@@ -3,19 +3,14 @@ import { useCallback, useState } from 'react'
 
 const Home: NextPage = () => {
   const apiKey = process.env.NEXT_PUBLIC_APIKEY
-  // console.log({ apiKey })
+  const axios = require(`axios`)
+  const BASE_URL = `https://labs.goo.ne.jp/api/hiragana`
 
   const [text1, setText1] = useState('毎週花の金曜日')
   const [text2, setText2] = useState('今ミライナビルにいる')
-  const [changeText1, setChangeText1] = useState('')
-  const [changeText2, setChangeText2] = useState('')
   const [answer, setAnswer] = useState('')
 
-  const axios = require(`axios`)
-  const APIKEY = `xxxxxxxxxxxxx` //API KEY
-  const BASE_URL = `https://labs.goo.ne.jp/api/hiragana`
-  const SENTECE = '汝、文学と科学の力を信じよ'
-
+  // 非同期のaxios
   const fetchApi = async (options) => {
     try {
       const res = await axios(options)
@@ -24,6 +19,8 @@ const Home: NextPage = () => {
       throw error
     }
   }
+
+  // 引数の文字をカタカナにして返す
   const changeTextType = async (sentence: string) => {
     const options = {
       method: 'post',
@@ -34,7 +31,6 @@ const Home: NextPage = () => {
         output_type: 'katakana',
       },
     }
-
     const fetchData = fetchApi(options) //axios(options)
       .then((res) => {
         console.log(res.data.converted)
@@ -46,22 +42,25 @@ const Home: NextPage = () => {
     return fetchData
   }
 
+  // formを送信 答えを押す
   const onSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault()
 
-      console.log(changeTextType(text1))
-      console.log(changeTextType(text2))
+      // console.log(changeTextType(text1))
+      // console.log(changeTextType(text2))
 
       const changeText1: string = await changeTextType(text1)
       const changeText2: string = await changeTextType(text2)
-      console.log({ changeText1 }, { changeText2 })
+      // console.log({ changeText1 }, { changeText2 })
 
+      // カタカナにした文字を配列に変換
       const arr1 = changeText1.split('')
       const arr2 = changeText2.split('')
-      console.log({ arr1 }, { arr2 })
+      // console.log({ arr1 }, { arr2 })
       let answer1 = ''
 
+      // 共通の文字を順に取得
       arr1.forEach((v) => {
         arr2.some((v2, i) => {
           if (v2 != ' ' && v2 === v) {
@@ -77,51 +76,75 @@ const Home: NextPage = () => {
     [text1, text2]
   )
 
+  const setProbrem1 = () => {
+    setText1('コールド')
+    setText2('デコード')
+  }
+  const setProbrem2 = () => {
+    setText1('毎週花の金曜日')
+    setText2('今ミライナビルにいる')
+  }
   const setProbrem3 = () => {
-    setText1('')
+    setText1('汝、文学と科学の力を信じよ')
+    setText2('情報分析して改善アクション')
   }
 
   return (
     <div className="min-h-screen px-4 py-10">
       <section className="flex flex-col gap-6">
-        <div className="flex gap-2">
+        <div
+          className="flex gap-2 cursor-pointer bg-gray-200 py-2 px-3 rounded-md duration-150 hover:shadow-md"
+          onClick={setProbrem1}
+        >
           <p>①</p>
           <div>
             <p>コールド</p>
             <p>デコード</p>
           </div>
         </div>
-        <div className="flex gap-2">
-          <p>①</p>
+        <div
+          className="flex gap-2 cursor-pointer bg-gray-200 py-2 px-3 rounded-md duration-150 hover:shadow-md"
+          onClick={setProbrem2}
+        >
+          <p>②</p>
           <div>
             <p>毎週花の金曜日</p>
-            <p>マイシュウハナノキンヨウビ</p>
+            <p>今ミライナビルにいる</p>
           </div>
         </div>
-        <div className="flex gap-2">
-          <p>①</p>
+        <div
+          className="flex gap-2 cursor-pointer bg-gray-200 py-2 px-3 rounded-md duration-150 hover:shadow-md"
+          onClick={setProbrem3}
+        >
+          <p>③</p>
           <div>
             <p>汝、文学と科学の力を信じよ</p>
             <p>情報分析して改善アクション</p>
           </div>
         </div>
       </section>
-      <form onSubmit={(e) => onSubmit(e)} className="flex flex-col">
-        <input
-          type="text"
-          value={text1}
-          onChange={(e) => setText1(e.target.value)}
-          className="border border-black"
-        />
-        <input
-          type="text"
-          value={text2}
-          onChange={(e) => setText2(e.target.value)}
-          className="border border-black"
-        />
-        <button type="submit">答え</button>
-      </form>
-      <div className="my-2 text-xl border-b text-red-600">{answer}</div>
+
+      <section className="mt-10">
+        <form onSubmit={(e) => onSubmit(e)} className="flex flex-col">
+          <input
+            type="text"
+            value={text1}
+            onChange={(e) => setText1(e.target.value)}
+            className="border border-black"
+          />
+          <input
+            type="text"
+            value={text2}
+            onChange={(e) => setText2(e.target.value)}
+            className="border border-black"
+          />
+          <button type="submit">答え</button>
+        </form>
+
+        <div className="my-2 text-xl border-b text-red-600 text-center">
+          {answer}
+        </div>
+      </section>
     </div>
   )
 }
