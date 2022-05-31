@@ -1,17 +1,27 @@
 import type { NextPage } from 'next'
 import { useCallback, useState } from 'react'
 
+type Options = {
+  method: string
+  url: string
+  data: {
+    app_id: string
+    sentence: string
+    output_type: string
+  }
+}
+
 const Home: NextPage = () => {
-  const apiKey = process.env.NEXT_PUBLIC_APIKEY
+  const apiKey = String(process.env.NEXT_PUBLIC_APIKEY)
   const axios = require(`axios`)
   const BASE_URL = `https://labs.goo.ne.jp/api/hiragana`
 
-  const [text1, setText1] = useState('毎週花の金曜日')
-  const [text2, setText2] = useState('今ミライナビルにいる')
-  const [answer, setAnswer] = useState('')
+  const [text1, setText1] = useState<string>('毎週花の金曜日')
+  const [text2, setText2] = useState<string>('今ミライナビルにいる')
+  const [answer, setAnswer] = useState<string>('')
 
   // 非同期のaxios
-  const fetchApi = async (options) => {
+  const fetchApi = async (options: Options) => {
     try {
       const res = await axios(options)
       return await res
@@ -21,8 +31,8 @@ const Home: NextPage = () => {
   }
 
   // 引数の文字をカタカナにして返す
-  const changeTextType = async (sentence: string) => {
-    const options = {
+  const changeTextType = useCallback(async (sentence: string) => {
+    const options: Options = {
       method: 'post',
       url: BASE_URL,
       data: {
@@ -40,19 +50,15 @@ const Home: NextPage = () => {
         console.log(err)
       })
     return fetchData
-  }
+  }, [])
 
   // formを送信 答えを押す
   const onSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault()
 
-      // console.log(changeTextType(text1))
-      // console.log(changeTextType(text2))
-
       const changeText1: string = await changeTextType(text1)
       const changeText2: string = await changeTextType(text2)
-      // console.log({ changeText1 }, { changeText2 })
 
       // カタカナにした文字を配列に変換
       const arr1 = changeText1.split('')
@@ -76,18 +82,18 @@ const Home: NextPage = () => {
     [text1, text2]
   )
 
-  const setProbrem1 = () => {
+  const setProbrem1 = useCallback(() => {
     setText1('コールド')
     setText2('デコード')
-  }
-  const setProbrem2 = () => {
+  }, [])
+  const setProbrem2 = useCallback(() => {
     setText1('毎週花の金曜日')
     setText2('今ミライナビルにいる')
-  }
-  const setProbrem3 = () => {
+  }, [])
+  const setProbrem3 = useCallback(() => {
     setText1('汝、文学と科学の力を信じよ')
     setText2('情報分析して改善アクション')
-  }
+  }, [])
 
   return (
     <div className="min-h-screen px-4 py-10">
@@ -138,12 +144,19 @@ const Home: NextPage = () => {
             onChange={(e) => setText2(e.target.value)}
             className="border border-black"
           />
-          <button type="submit">答え</button>
-        </form>
+          <div className="flex items-center mt-3 gap-3 justify-center">
+            <button
+              type="submit"
+              className="inline w-10 text-white rounded border border-blue-500 bg-blue-500 duration-200 hover:text-blue-500 hover:bg-white"
+            >
+              答え
+            </button>
 
-        <div className="my-2 text-xl border-b text-red-600 text-center">
-          {answer}
-        </div>
+            <div className="my-2 text-xl border-b-2 border-blue-500 text-red-600 text-center">
+              {answer}
+            </div>
+          </div>
+        </form>
       </section>
     </div>
   )
