@@ -1,84 +1,127 @@
 import type { NextPage } from 'next'
-import Head from 'next/head'
-import Image from 'next/image'
+import { useCallback, useState } from 'react'
 
 const Home: NextPage = () => {
+  const apiKey = process.env.NEXT_PUBLIC_APIKEY
+  // console.log({ apiKey })
+
+  const [text1, setText1] = useState('毎週花の金曜日')
+  const [text2, setText2] = useState('今ミライナビルにいる')
+  const [changeText1, setChangeText1] = useState('')
+  const [changeText2, setChangeText2] = useState('')
+  const [answer, setAnswer] = useState('')
+
+  const axios = require(`axios`)
+  const APIKEY = `xxxxxxxxxxxxx` //API KEY
+  const BASE_URL = `https://labs.goo.ne.jp/api/hiragana`
+  const SENTECE = '汝、文学と科学の力を信じよ'
+
+  const fetchApi = async (options) => {
+    try {
+      const res = await axios(options)
+      return await res
+    } catch (error) {
+      throw error
+    }
+  }
+  const changeTextType = async (sentence: string) => {
+    const options = {
+      method: 'post',
+      url: BASE_URL,
+      data: {
+        app_id: apiKey,
+        sentence: sentence,
+        output_type: 'katakana',
+      },
+    }
+
+    const fetchData = fetchApi(options) //axios(options)
+      .then((res) => {
+        console.log(res.data.converted)
+        return res.data.converted
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+    return fetchData
+  }
+
+  const onSubmit = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault()
+
+      console.log(changeTextType(text1))
+      console.log(changeTextType(text2))
+
+      const changeText1: string = await changeTextType(text1)
+      const changeText2: string = await changeTextType(text2)
+      console.log({ changeText1 }, { changeText2 })
+
+      const arr1 = changeText1.split('')
+      const arr2 = changeText2.split('')
+      console.log({ arr1 }, { arr2 })
+      let answer1 = ''
+
+      arr1.forEach((v) => {
+        arr2.some((v2, i) => {
+          if (v2 != ' ' && v2 === v) {
+            answer1 += v2
+            arr2.splice(0, i + 1)
+            return true
+          }
+        })
+      })
+
+      setAnswer(answer1)
+    },
+    [text1, text2]
+  )
+
+  const setProbrem3 = () => {
+    setText1('')
+  }
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center py-2">
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className="flex w-full flex-1 flex-col items-center justify-center px-20 text-center">
-        <h1 className="text-6xl font-bold">
-          Welcome to{' '}
-          <a className="text-blue-600" href="https://nextjs.org">
-            Next.js!
-          </a>
-        </h1>
-
-        <p className="mt-3 text-2xl">
-          Get started by editing{' '}
-          <code className="rounded-md bg-gray-100 p-3 font-mono text-lg">
-            pages/index.tsx
-          </code>
-        </p>
-
-        <div className="mt-6 flex max-w-4xl flex-wrap items-center justify-around sm:w-full">
-          <a
-            href="https://nextjs.org/docs"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Documentation &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Find in-depth information about Next.js features and its API.
-            </p>
-          </a>
-
-          <a
-            href="https://nextjs.org/learn"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Learn &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Learn about Next.js in an interactive course with quizzes!
-            </p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/canary/examples"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Examples &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Discover and deploy boilerplate example Next.js projects.
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Deploy &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
+    <div className="min-h-screen px-4 py-10">
+      <section className="flex flex-col gap-6">
+        <div className="flex gap-2">
+          <p>①</p>
+          <div>
+            <p>コールド</p>
+            <p>デコード</p>
+          </div>
         </div>
-      </main>
-
-      <footer className="flex h-24 w-full items-center justify-center border-t">
-        <a
-          className="flex items-center justify-center gap-2"
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-        </a>
-      </footer>
+        <div className="flex gap-2">
+          <p>①</p>
+          <div>
+            <p>毎週花の金曜日</p>
+            <p>マイシュウハナノキンヨウビ</p>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <p>①</p>
+          <div>
+            <p>汝、文学と科学の力を信じよ</p>
+            <p>情報分析して改善アクション</p>
+          </div>
+        </div>
+      </section>
+      <form onSubmit={(e) => onSubmit(e)} className="flex flex-col">
+        <input
+          type="text"
+          value={text1}
+          onChange={(e) => setText1(e.target.value)}
+          className="border border-black"
+        />
+        <input
+          type="text"
+          value={text2}
+          onChange={(e) => setText2(e.target.value)}
+          className="border border-black"
+        />
+        <button type="submit">答え</button>
+      </form>
+      <div className="my-2 text-xl border-b text-red-600">{answer}</div>
     </div>
   )
 }
